@@ -1,7 +1,7 @@
 import pandas as pd
 import cv2
 import os
-from Image import *
+from ImageTools import *
 
 def parse_annotations(label_string):
     bboxes = []
