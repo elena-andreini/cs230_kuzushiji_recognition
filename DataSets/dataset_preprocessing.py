@@ -13,7 +13,7 @@ def parse_annotations(label_string):
         w = int(labels[i + 3])
         h = int(labels[i + 4])
         unicode_pt = labels[i]
-        bboxes.append((x, y, w, h), unicode_pt)
+        bboxes.append(((x, y, w, h), unicode_pt))
     return bboxes
 
 
@@ -53,10 +53,10 @@ def crop_images(annotations_file, img_src_dir, img_dst_dir, data_filter = None):
         img = cv2.imread(p)
         bboxes = parse_annotations(row['labels'])
         for bbox, lab in bboxes:
-            x1 = min(max(0 , bbox[1]), img.shape[1])
-            y1 = min(max(0, bbox[0]), img.shape[0])
-            x2 = min(x1 +  bbox[3], img.shape[1])
-            y2 = min(y1 + bbox[2], img.shape[0])
+            x1 = min(max(0 , bbox[0]), img.shape[1])
+            y1 = min(max(0, bbox[1]), img.shape[0])
+            x2 = min(x1 +  bbox[2], img.shape[1])
+            y2 = min(y1 + bbox[3], img.shape[0])
             cropped_img = img[y1 : y2, x1 : x2]
             if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
                 cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
@@ -66,23 +66,27 @@ def crop_images(annotations_file, img_src_dir, img_dst_dir, data_filter = None):
             image_dst_path = os.path.join(img_dst_dir, image_name)
             cv2.imwrite(image_dst_path, cropped_img)
             
-def crop_and_save(image_id, img_src_dir, img_dst_dir, bbox, label):
+def crop_and_save(image_id, bbox, label, img_src_dir, img_dst_dir):
     p = os.path.join(img_src_dir, image_id + '.jpg')
-    if not os.path.exist(p):
+    if not os.path.exists(p):
         return
     img = cv2.imread(p)
-    x1 = min(max(0 , bbox[1]), img.shape[1])
-    y1 = min(max(0, bbox[0]), img.shape[0])
-    x2 = min(x1 +  bbox[3], img.shape[1])
-    y2 = min(y1 + bbox[2], img.shape[0])
+    x1 = min(max(0 , bbox[0]), img.shape[1])
+    y1 = min(max(0, bbox[1]), img.shape[0])
+    x2 = min(x1 +  bbox[2], img.shape[1])
+    y2 = min(y1 + bbox[3], img.shape[0])
     cropped_img = img[y1 : y2, x1 : x2]
     if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
         cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
     else :
         cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
-    image_name = f'{image_id}_{label}_{x1}_{y1}_{x2 - x1}_{y2-y1}.png'
-    image_dst_path = os.path.join(dst_path, image_name)
-    cv2.imwrite(image_dst_path, cropped_img)
+    image_name = f'{label}_{image_id}_{x1}_{y1}_{x2 - x1}_{y2-y1}.png'
+    image_dst_path = os.path.join(img_dst_dir, image_name)
+    #print(f'saving image {image_dst_path}')
+    result = cv2.imwrite(image_dst_path, cropped_img)
+    if not result:
+      print(f'could not save image {image_dst_path}')
+    return image_dst_path
         
         
 def crop_images_with_ctx(annotations_file, img_src_dir, img_dst_dir, radius = 2, data_filter = None):
@@ -95,10 +99,10 @@ def crop_images_with_ctx(annotations_file, img_src_dir, img_dst_dir, radius = 2,
         img = cv2.imread(p)
         bboxes = parse_annotations(row['labels'])
         for bbox, label in bboxes:
-            x1 = max(0, bbox[1] - radius * bbox[3])
-            x2 = min(img.shape[1], bbox[1] + (radius+1) * bbox[3])
-            y1 = max(0, bbox[0] - radius * bbox[2])
-            y2 = min(img.shape[0], bbox[0] + (radius+1) * bbox[2])
+            x1 = max(0, bbox[0] - radius * bbox[2])
+            x2 = min(img.shape[1], bbox[0] + (radius+1) * bbox[2])
+            y1 = max(0, bbox[1] - radius * bbox[3])
+            y2 = min(img.shape[0], bbox[1] + (radius+1) * bbox[3])
             cropped_img = img[y1 : y2, x1 : x2]
             if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
                 cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
@@ -110,18 +114,19 @@ def crop_images_with_ctx(annotations_file, img_src_dir, img_dst_dir, radius = 2,
             
 def crop_with_ctx_and_save(image_id, bbox, label, img_src_dir, img_dst_dir, radius=2):
         p = os.path.join(img_src_dir, image_id + '.jpg')
-        if not os.path.exist(p):
+        if not os.path.exists(p):
             return
         img = cv2.imread(p)
-        x1 = max(0, bbox[1] - radius * bbox[3])
-        x2 = min(img.shape[1], bbox[1] + (radius+1) * bbox[3])
-        y1 = max(0, bbox[0] - radius * bbox[2])
-        y2 = min(img.shape[0], bbox[0] + (radius+1) * bbox[2])
+        x1 = max(0, bbox[0] - radius * bbox[2])
+        x2 = min(img.shape[1], bbox[0] + (radius+1) * bbox[2])
+        y1 = max(0, bbox[1] - radius * bbox[3])
+        y2 = min(img.shape[0], bbox[1] + (radius+1) * bbox[3])
         cropped_img = img[y1 : y2, x1 : x2]
         if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
         else :
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
-        image_name = f'{image_id}_{label}_{x1}_{y1}_{x2 - x1}_{y2-y1}_ctx_{radius}.png'
+        image_name = f'{label}_{image_id}_{bbox[0]}_{bbox[1]}_{bbox[2] - bbox[0]}_{bbox[3]-bbox[1]}_ctx_{radius}.png'
         image_dst_path = os.path.join(img_dst_dir, image_name)
         cv2.imwrite(image_dst_path, cropped_img)
+        return image_dst_path
