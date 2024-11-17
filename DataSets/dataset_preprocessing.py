@@ -1,7 +1,7 @@
 import pandas as pd
 import cv2
 import os
-from ..Image import *
+from Image import *
 
 def parse_annotations(label_string):
     bboxes = []
@@ -63,7 +63,7 @@ def crop_images(annotations_file, img_src_dir, img_dst_dir, data_filter = None):
             else :
                 cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
             image_name = f'{image_id}_{x1}_{y1}_{x2 - x1}_{y2-y1}.png'
-            image_dst_path = os.path.join(dst_path, image_name)
+            image_dst_path = os.path.join(img_dst_dir, image_name)
             cv2.imwrite(image_dst_path, cropped_img)
             
 def crop_and_save(image_id, img_src_dir, img_dst_dir, bbox):
@@ -99,16 +99,13 @@ def crop_images_with_ctx(annotations_file, img_src_dir, img_dst_dir, radius = 2,
             x2 = min(img.shape[1], bbox[1] + (radius+1) * bbox[3])
             y1 = max(0, bbox[0] - radius * bbox[2])
             y2 = min(img.shape[0], bbox[0] + (radius+1) * bbox[2])
-            ctx_image = image[y1 : y2, x1 : x2]
-            ctx_padding = calculate_padding(ctx_image)
-            ctx_image = edge_aware_pad(ctx_image, ctx_padding)
             cropped_img = img[y1 : y2, x1 : x2]
             if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
                 cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
             else :
                 cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
             image_name = f'{image_id}_{x1}_{y1}_{x2 - x1}_{y2-y1}_ctx.png'
-            image_dst_path = os.path.join(dst_path, image_name)
+            image_dst_path = os.path.join(img_dst_dir, image_name)
             cv2.imwrite(image_dst_path, cropped_img)
             
 def crop_with_ctx_and_save(image_id, bbox, img_src_dir, img_dst_dir, radius=2):
@@ -116,19 +113,15 @@ def crop_with_ctx_and_save(image_id, bbox, img_src_dir, img_dst_dir, radius=2):
         if not os.path.exist(p):
             return
         img = cv2.imread(p)
-        bboxes = parse_annotations(row['labels'])
         x1 = max(0, bbox[1] - radius * bbox[3])
         x2 = min(img.shape[1], bbox[1] + (radius+1) * bbox[3])
         y1 = max(0, bbox[0] - radius * bbox[2])
         y2 = min(img.shape[0], bbox[0] + (radius+1) * bbox[2])
-        ctx_image = image[y1 : y2, x1 : x2]
-        ctx_padding = calculate_padding(ctx_image)
-        ctx_image = edge_aware_pad(ctx_image, ctx_padding)
         cropped_img = img[y1 : y2, x1 : x2]
         if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
         else :
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
         image_name = f'{image_id}_{x1}_{y1}_{x2 - x1}_{y2-y1}_ctx_{radius}.png'
-        image_dst_path = os.path.join(dst_path, image_name)
+        image_dst_path = os.path.join(img_dst_dir, image_name)
         cv2.imwrite(image_dst_path, cropped_img)

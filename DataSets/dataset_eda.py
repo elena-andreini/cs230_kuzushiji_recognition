@@ -33,7 +33,8 @@ def get_kuzushiji_stats(annotations_file):
             stats[unicode_char] +=1
           else :
             stats[unicode_char] = 1
-    return stats
+      sorted_stats = sorted(stats.items(), key=lambda item: item[1], reverse=True)
+    return sorted_stats
     
 def unicode_labels_to_ints(annotations_file):
     unicode_labels = get_kuzushiji_labels(annotations_file)
