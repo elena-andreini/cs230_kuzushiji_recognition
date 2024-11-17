@@ -44,3 +44,11 @@ def unicode_labels_to_ints(annotations_file):
     sorted_items = sorted(labels_dict.items(), key=lambda item: item[1])
     ordered_labels = {key: idx for idx, (key, _) in enumerate(sorted_items)}
     return ordered_labels
+
+def convert_labels(labels_stats):
+    labels_dict = {}
+    for ul in labels_stats:
+      labels_dict[ul] = unicode_descr_to_int(ul)
+    sorted_items = sorted(labels_dict.items(), key=lambda item: item[1])
+    ordered_labels = {key: idx for idx, (key, _) in enumerate(sorted_items)}
+    return ordered_labels
