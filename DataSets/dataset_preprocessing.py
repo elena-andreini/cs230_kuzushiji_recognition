@@ -126,7 +126,7 @@ def crop_with_ctx_and_save(image_id, bbox, label, img_src_dir, img_dst_dir, radi
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
         else :
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
-        image_name = f'{label}_{image_id}_{bbox[0]}_{bbox[1]}_{bbox[2] - bbox[0]}_{bbox[3]-bbox[1]}_ctx_{radius}.png'
+        image_name = f'{label}_{image_id}_{bbox[0]}_{bbox[1]}_{bbox[2]}_{bbox[3]}_ctx_{radius}.png'
         image_dst_path = os.path.join(img_dst_dir, image_name)
         cv2.imwrite(image_dst_path, cropped_img)
         return image_dst_path
