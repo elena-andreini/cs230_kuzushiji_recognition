@@ -1,6 +1,7 @@
-import pandas as pd
 import cv2
 import os
+from sklearn.model_selection import train_test_split
+import pandas as pd
 from ImageTools import *
 
 def parse_annotations(label_string):
@@ -130,3 +131,57 @@ def crop_with_ctx_and_save(image_id, bbox, label, img_src_dir, img_dst_dir, radi
         image_dst_path = os.path.join(img_dst_dir, image_name)
         cv2.imwrite(image_dst_path, cropped_img)
         return image_dst_path
+        
+        
+        
+def copy_dataset(annotations_file, src_dir, dst_dir, fraction= 1.0, max_index = None):
+    df = pd.read_csv(annotations_file)
+    if fraction < 1.0:
+        df =df.sample(frac=fraction).reset_index(drop=True)
+    if max_index is not None:
+        max_index = min(max_index, df.shape[0])
+        df = df[:max_index]
+    # Create the destination directory if it doesn't exist
+    os.makedirs(dst_dir, exist_ok=True)
+       
+    # Iterate over the dataframe and copy files
+    for file_name in df['image_id']:
+         src_path = os.path.join(src_dir, file_name+'.jpg')
+         dest_path = os.path.join(dst_dir, file_name+'.jpg')
+         shutil.copy(src_path, dest_path)
+        
+        
+def generate_classification_dataset(df, classes, full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_path):
+    """
+    Generates the training data for the classification model
+    cropping patches from full page images. 
+    Only training examples belonging the classes are generated
+    """
+    data = []
+    for _, row in df.iterrows():
+        image_id = row['image_id']
+        aa = dataset_preprocessing.parse_annotations(row['labels'])
+        for a in aa:
+          if a[1] not in classes:
+            continue
+          im1 = dataset_preprocessing.crop_and_save(image_id, a[0], a[1],
+                                              full_images_path,
+                                              char_images_dst_path)
+          im2 = dataset_preprocessing.crop_with_ctx_and_save(image_id, a[0], a[1],
+                                              full_images_path,
+                                              context_images_dst_path)
+
+          data.append([a[1], im1, im2])
+          
+
+        proc_df = pd.DataFrame(data, columns=['label', 'char_path', 'ctx_path'])
+        proc_df.to_csv(dst_annotations_path)
+
+def split_classification_dataset(annotations_file, train_annotation_dst_path, valid_annotation_dst_path):
+    pd.read_csv(annotations_file)
+    # Shuffling the DataFrame
+    shuffled_df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+    # Splitting the DataFrame into training and validation sets
+    train_df, val_df = train_test_split(shuffled_df, test_size=0.2, random_state=42)
+    train_df.to_csv(train_annotation_dst_path, index=False)
+    val_df.to_csv(valid_annotation_dst_path, index=False)

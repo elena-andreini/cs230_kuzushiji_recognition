@@ -1,4 +1,5 @@
 import torch
+from torch import nn
 
 class ContrastiveLoss(nn.Module):
     def __init__(self, margin=1.0):
