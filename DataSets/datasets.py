@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader, Dataset
 from ImageTools.custom_transforms import MinMaxNormalize
 
 class SimpleImageDataset(Dataset):
-    def __init__(self, images, transform):
+    def __init__(self, images, transform= None):
         self.images = images
         #self.mean = np.mean(images)
         #self.stdev = np.std(images)
@@ -36,6 +36,6 @@ class SimpleImageDataset(Dataset):
 
     def __getitem__(self, idx):
         image = self.images[idx]
-        tr_image = self.transform(image)
-        #o_image = self.trivial_transform(image)
-        return tr_image #, o_image
+        if self.transform is not None:
+            image = self.transform(image)
+        return image
