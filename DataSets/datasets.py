@@ -1,3 +1,4 @@
+from torch.utils.data import DataLoader, Dataset
 from ImageTools.custom_transforms import MinMaxNormalize
 
 class SimpleImageDataset(Dataset):
