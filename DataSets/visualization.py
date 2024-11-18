@@ -41,3 +41,22 @@ def show_images_1(imgs, labels):
         # Add label to the image
         ax.text(10, 10, label, color='red', fontsize=12, bbox=dict(facecolor='white', alpha=0.7))
         ax.axis('off')
+
+
+def show_images_autoencoder(original, reconstructed, num_images=5):
+    fig, axes = plt.subplots(2, num_images, figsize=(num_images * 2, 4))
+
+    for i in range(num_images):
+        # Original images
+        ax = axes[0, i]
+        ax.imshow(original[i].permute(1, 2, 0).squeeze(), cmap='gray')
+        ax.axis('off')
+
+        # Reconstructed images
+        ax = axes[1, i]
+        ax.imshow(reconstructed[i].permute(1, 2, 0).squeeze(), cmap='gray')
+        ax.axis('off')
+
+    plt.show()
+
+
