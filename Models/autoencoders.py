@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torchvision.models as models
 from torchvision.models import ResNet18_Weights 
 
 class ResNet18Encoder(nn.Module):
