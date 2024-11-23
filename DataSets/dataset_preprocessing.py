@@ -1,5 +1,6 @@
 import cv2
 import os
+import shutil
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from ImageTools import *
@@ -143,7 +144,7 @@ def copy_dataset(annotations_file, src_dir, dst_dir, fraction= 1.0, max_index = 
         df = df[:max_index]
     # Create the destination directory if it doesn't exist
     os.makedirs(dst_dir, exist_ok=True)
-       
+    print(f'copying {df.shape[0]} images')
     # Iterate over the dataframe and copy files
     for file_name in df['image_id']:
          src_path = os.path.join(src_dir, file_name+'.jpg')

@@ -17,9 +17,37 @@ from pathlib import Path
 # drive.mount('/content/drive')
 
 
-from Datasets.datasets import KuzushijiCenterNetDataset, visualize_centernet_heatmap
-from Models.detection_models import CenterNet, decode_heatmap,
-from Datasets.dataset_preprocessing import copy_dataset
+from DataSets.datasets import KuzushijiCenterNetDataset, visualize_centernet_heatmap
+from Models.detection_models import CenterNet, decode_heatmap
+from DataSets.dataset_preprocessing import copy_dataset
+
+
+
+# When working on Google Colab reading data directly from Google Drive is slow
+# Copying data to Colab
+
+
+#images_dir = '/content/kuzushiji-recognition/train_images' #'/content/drive/MyDrive/kuzushiji-recognition/train_images'
+
+# The file with annotations (boxes and unicode points)
+annotations_file = '/content/drive/MyDrive/kuzushiji-recognition/train.csv'
+
+# Source directory in Google Drive : location to copy from
+src_dir = '/content/drive/MyDrive/kuzushiji-recognition/train_images'
+# Destination directory in Colab : location to copy to
+dest_dir = '/content/kuzushiji-recognition/train_images'
+
+# Create destination directory if it does not exist
+try:
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+except OSError as e:
+    print(f"Error creating directory '{dest_dir}': {e}")
+
+
+
+# Copying the dataset locally for increased efficiency
+copy_dataset(annotations_file, src_dir, dest_dir)
 
 
 # Leaving out normalization for the moment
@@ -29,20 +57,11 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-
-
-images_dir = '/content/kuzushiji-recognition/train_images' #'/content/drive/MyDrive/kuzushiji-recognition/train_images'
-annotations_file = '/content/drive/MyDrive/kuzushiji-recognition/train.csv'
 dataset = KuzushijiCenterNetDataset(images_dir = images_dir, annotations_file = annotations_file, transform = transform, fraction = 0.1)
 dataloader = DataLoader(dataset, batch_size=16, shuffle=True,  collate_fn=custom_collate_fn)
 
 
-# Source and destination directories
-src_dir = '/content/drive/MyDrive/kuzushiji-recognition/train_images'
-dest_dir = '/content/kuzushiji-recognition/train_images'
 
-# Copying the dataset locally for increased efficiency
-copy_dataset(annotations_file, src_dir, dest_dir)
 
 
 # Visualize the dataset 
