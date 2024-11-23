@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import torchvision.models as models
 
 class CenterNet(nn.Module):
     def __init__(self, num_classes=1, backbone_name='resnet18'):

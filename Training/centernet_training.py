@@ -11,7 +11,7 @@ from PIL import Image
 import numpy as np
 import pandas as pd
 from pathlib import Path
-
+from DataSets.visualization import show_images_and_boxes
 
 # from google.colab import drive
 # drive.mount('/content/drive')
@@ -20,7 +20,7 @@ from pathlib import Path
 from DataSets.datasets import KuzushijiCenterNetDataset, visualize_centernet_heatmap
 from Models.detection_models import CenterNet, decode_heatmap
 from DataSets.dataset_preprocessing import copy_dataset
-
+from DataSets.utils import custom_collate_fn
 
 
 # When working on Google Colab reading data directly from Google Drive is slow
@@ -70,7 +70,7 @@ dataiter = iter(dataloader)
 batch = next(dataiter)
 # Unpack the batch
 dl_images, gt_heatmaps, gt_offsets, gt_sizes, boxes = batch
-show_images_1(dl_images, boxes)
+show_images_and_boxes(dl_images, boxes)
 plt.show()
 
 

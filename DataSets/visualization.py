@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import matplotlib.patches as patches
 
 def show_image(image_path):
     # Read the image from the given path
@@ -40,6 +41,28 @@ def show_images_1(imgs, labels):
         ax.imshow(img.permute(1, 2, 0).squeeze(), cmap='gray')
         # Add label to the image
         ax.text(10, 10, label, color='red', fontsize=12, bbox=dict(facecolor='white', alpha=0.7))
+        ax.axis('off')
+
+
+
+def show_images_and_boxes(imgs, boxes):
+    print(f'show_images_1 - imgs.shape {imgs.shape}')
+    if imgs.ndim == 3: # Add a new dimension to handle the single image case
+        imgs = imgs.unsqueeze(0)
+        boxes = [boxes]
+    fig, axes = plt.subplots(1, imgs.shape[0], figsize=(15, 15))
+    # If there's only one image, axes will not be an array
+    if imgs.shape[0] == 1:
+      axes = [axes]
+    imgs_list = images_list = [imgs[i] for i in range(imgs.shape[0])]
+    for img, box, ax in zip(imgs_list, boxes, axes):
+        #print(f'img shape {img.shape}')
+        ax.imshow(img.permute(1, 2, 0).squeeze(), cmap='gray')
+        for b in box:
+          # Unpack the box coordinates
+          x, y, width, height = b
+          rect = patches.Rectangle((x, y), width, height, linewidth=1, edgecolor='r', facecolor='none')
+          ax.add_patch(rect)
         ax.axis('off')
 
 
