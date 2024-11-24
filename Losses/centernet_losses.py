@@ -30,15 +30,14 @@ def adaptive_size_loss(pred_size, gt_size):
     penalty = torch.exp(error) - 1  # Exponential penalty
     return (penalty * error).mean()
 
-def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, gt_size):
-    heatmap_loss = focal_loss(pred_heatmap, gt_heatmap)
-    offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / gt_heatmap.sum()
-    size_loss = adaptive_size_loss(pred_size, gt_size) / gt_heatmap.sum()
-    
-    return heatmap_loss + offset_loss + size_loss
 
-   
 
+def log_cosh_loss(pred, target):
+    loss = torch.log(torch.cosh(pred - target))
+    return loss.mean()
+
+
+  
 
 def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, gt_size, pos_threshold=1.0):
     # Count the number of keypoints 
@@ -54,5 +53,6 @@ def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, 
         
     offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / gt_heatmap.sum()
     #size_loss = nn.functional.mse_loss(pred_size, gt_size, reduction='sum') / gt_heatmap.sum()
-    size_loss = adaptive_size_loss(pred_size, gt_size) / gt_heatmap.sum()
+    #size_loss = adaptive_size_loss(pred_size, gt_size) / gt_heatmap.sum()
+    size_loss = log_cosh_loss(pred_size, gt_size) * 2
     return heatmap_loss + offset_loss +  size_loss
