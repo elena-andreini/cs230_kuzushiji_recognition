@@ -60,16 +60,10 @@ def draw_gaussian(heatmap, center, sigma=2):
     g_y = max(0, -ul[1]), min(br[1], h) - ul[1]
     img_x = max(0, ul[0]), min(br[0], w)
     img_y = max(0, ul[1]), min(br[1], h)
-
-    # heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]] = np.maximum(
-        # heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]],
-        # g[g_y[0]:g_y[1], g_x[0]:g_x[1]]
-    # )
     heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]] = np.maximum(
-    heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]],
-    g[img_y[0]:img_y[1], img_x[0]:img_x[1]])
-
-
+        heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]],
+        g[g_y[0]:g_y[1], g_x[0]:g_x[1]]
+    )
     return heatmap
 
 
@@ -85,6 +79,15 @@ def create_heatmap_with_gaussian(bboxes, img_shape, down_ratio=4, sigma=2):
         heatmap[0] = draw_gaussian(heatmap[0], (center_x, center_y), sigma=sigma)
 
     return heatmap
+    
+def smooth_tensors_with_gaussian(centers, heatmap, offset, size, sigma=2):
+    for center in centers:
+        draw_gaussian(heatmap, center, sigma)
+        draw_gaussian(offset[0], center, sigma)
+        draw_gaussian(offset[1], center, sigma)
+        draw_gaussian(size[0], center, sigma)
+        draw_gaussian(size[1], center, sigma)
+
 
 
 class KuzushijiDualDataset(Dataset):
@@ -170,18 +173,19 @@ class KuzushijiCenterNetDataset(Dataset):
         heatmap = np.zeros((1, img_shape[1] // self.down_ratio, img_shape[2] // self.down_ratio))
         offset = np.zeros((2, img_shape[1] // self.down_ratio, img_shape[2] // self.down_ratio))
         size = np.zeros((2, img_shape[1] // self.down_ratio, img_shape[2] // self.down_ratio))
-        heatmap = create_heatmap_with_gaussian(bboxes, img_shape, self.down_ratio)
+        #heatmap = create_heatmap_with_gaussian(bboxes, img_shape, self.down_ratio)
+        centers = []
         for bbox in bboxes:
             x, y, w, h = bbox
-
             center_x, center_y = int(x + w / 2) // self.down_ratio, int(y + h / 2) // self.down_ratio
-
-            #heatmap[0, center_y, center_x] = 1
+            centers.append((center_x, center_y))
+            heatmap[0, center_y, center_x] = 1
             offset[0, center_y, center_x] = (x + w / 2) / self.down_ratio - center_x
             offset[1, center_y, center_x] = (y + h / 2) / self.down_ratio - center_y
             size[0, center_y, center_x] = np.log(max(w / self.down_ratio, epsilon))
             size[1, center_y, center_x] = np.log(max(h / self.down_ratio, epsilon))
-
+        smooth_tensors_with_gaussian(centers, heatmap, offset, size)
+        
         return torch.tensor(heatmap, dtype=torch.float32), torch.tensor(offset, dtype=torch.float32), torch.tensor(size, dtype=torch.float32)
         
         
@@ -189,18 +193,19 @@ def create_centernet_ground_truth(bboxes, img_shape, down_ratio, epsilon = 1e-6)
         heatmap = np.zeros((1, img_shape[1] // down_ratio, img_shape[2] // down_ratio))
         offset = np.zeros((2, img_shape[1] // down_ratio, img_shape[2] // down_ratio))
         size = np.zeros((2, img_shape[1] // down_ratio, img_shape[2] // down_ratio))
-        heatmap = create_heatmap_with_gaussian(bboxes, img_shape, down_ratio)
+        #heatmap = create_heatmap_with_gaussian(bboxes, img_shape, down_ratio)
+        centers = []
         for bbox in bboxes:
             x, y, w, h = bbox
-
             center_x, center_y = int(x + w / 2) // down_ratio, int(y + h / 2) // down_ratio
-
-            #heatmap[0, center_y, center_x] = 1
+            centers.append((center_x, center_y))
+            heatmap[0, center_y, center_x] = 1
             offset[0, center_y, center_x] = (x + w / 2) / down_ratio - center_x
             offset[1, center_y, center_x] = (y + h / 2) / down_ratio - center_y
             size[0, center_y, center_x] = np.log(max(w / down_ratio, epsilon))
             size[1, center_y, center_x] = np.log(max(h / down_ratio, epsilon))
-
+        smooth_tensors_with_gaussian(centers, heatmap, offset, size)
+        
         return torch.tensor(heatmap, dtype=torch.float32), torch.tensor(offset, dtype=torch.float32), torch.tensor(size, dtype=torch.float32)
         
         

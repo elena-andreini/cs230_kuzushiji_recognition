@@ -35,8 +35,9 @@ class CenterNet(nn.Module):
 
 
 def decode_heatmap(heatmap, offset, size, ratio = 4.0, threshold=0.5):
-    # Ensure values are between 0 and 1
-    heatmap = heatmap.sigmoid()
+    """
+    Expects the heatmap values are between 0 and 1
+    """
     #print(f'heatmap shape {heatmap.shape}')
     # List to store bounding boxes for all images in the batch
     all_boxes = []
