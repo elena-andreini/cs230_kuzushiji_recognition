@@ -36,7 +36,8 @@ def log_cosh_loss(pred, target):
     loss = torch.log(torch.cosh(pred - target))
     return loss.mean()
 
-
+def huber_loss(pred, target, delta=1.0): 
+    return nn.functional.smooth_l1_loss(pred, target, reduction='mean', beta=delta)
   
 
 def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, gt_size, pos_threshold=1.0):
@@ -54,5 +55,5 @@ def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, 
     offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / gt_heatmap.sum()
     #size_loss = nn.functional.mse_loss(pred_size, gt_size, reduction='sum') / gt_heatmap.sum()
     #size_loss = adaptive_size_loss(pred_size, gt_size) / gt_heatmap.sum()
-    size_loss = log_cosh_loss(pred_size, gt_size) * 2
+    size_loss = huber_loss(pred_size, gt_size)
     return heatmap_loss + offset_loss +  size_loss
