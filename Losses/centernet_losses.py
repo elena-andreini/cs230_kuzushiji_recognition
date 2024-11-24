@@ -24,10 +24,18 @@ def focal_loss(pred, gt, pos_threshold=0.5):
     return loss
 	
 	
-def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, gt_size):
-    #print(f'prediction shape {pred_heatmap.shape}')
-    #print(f'gt heatmap shape {gt_heatmap.shape}')
-    heatmap_loss = focal_loss(pred_heatmap, gt_heatmap)
-    offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / gt_heatmap.sum()
-    size_loss = nn.functional.mse_loss(pred_size, gt_size, reduction='sum') / gt_heatmap.sum()
+def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, gt_size, pos_threshold=1.0):
+    # Count the number of keypoints 
+    num_pos = gt_heatmap.gt(pos_threshold).float().sum()
+    heatmap_loss = focal_loss(pred_heatmap, gt_heatmap, pos_threshold=pos_threshold)
+    # Calculate offset loss and size loss 
+    if num_pos > 0: 
+        offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / num_pos
+        size_loss = nn.functional.mse_loss(pred_size, gt_size, reduction='sum') / num_pos        
+    else: 
+        offset_loss = torch.tensor(0.0, device=pred_heatmap.device) 
+        size_loss = torch.tensor(0.0, device=pred_heatmap.device) 
+        
+    #offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / gt_heatmap.sum()
+    #size_loss = nn.functional.mse_loss(pred_size, gt_size, reduction='sum') / gt_heatmap.sum()
     return heatmap_loss + offset_loss +  size_loss

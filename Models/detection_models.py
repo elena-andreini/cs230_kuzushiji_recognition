@@ -29,7 +29,57 @@ class CenterNet(nn.Module):
         
         
 
-def decode_heatmap(heatmap, offset, size, threshold=0.5):
+
+
+
+
+
+def decode_heatmap(heatmap, offset, size, ratio = 4.0, threshold=0.5):
+    # Ensure values are between 0 and 1
+    heatmap = heatmap.sigmoid()
+    #print(f'heatmap shape {heatmap.shape}')
+    # List to store bounding boxes for all images in the batch
+    all_boxes = []
+
+    # Iterate over the batch dimension
+    for batch_index in range(heatmap.shape[0]):
+        heatmap_b = heatmap[batch_index].squeeze()
+        offset_b = offset[batch_index].squeeze()
+        size_b = size[batch_index].squeeze()
+
+        threshold_mask = heatmap_b > threshold
+
+        # Find the coordinates of key points
+        y_indices, x_indices = torch.nonzero(threshold_mask, as_tuple=True)
+
+        # Use the offset to adjust positions
+        adjusted_x = x_indices.float() + offset_b[0, y_indices, x_indices]
+        adjusted_y = y_indices.float() + offset_b[1, y_indices, x_indices]
+
+        # Use the size to determine width and height
+        widths = torch.exp(size_b[0, y_indices, x_indices])
+        heights = torch.exp(size_b[1, y_indices, x_indices])
+
+        # Create bounding boxes for the current image
+        boxes = []
+        for i in range(len(adjusted_x)):
+            x_center = adjusted_x[i].item()
+            y_center = adjusted_y[i].item()
+            width = widths[i].item()
+            height = heights[i].item()
+            x_min = x_center - width / 2
+            y_min = y_center - height / 2
+            boxes.append([x_min * ratio, y_min * ratio, width * ratio, height * ratio])
+
+        # Append the boxes for the current image to the all_boxes list
+        all_boxes.append(boxes)
+
+    return all_boxes
+
+
+
+
+def decode_heatmap_s(heatmap, offset, size, threshold=0.5):
     # Step 1: Apply threshold to heatmap
     heatmap = heatmap.squeeze()  # Remove batch dimension
     offset = offset.squeeze()
