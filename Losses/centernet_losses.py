@@ -1,11 +1,11 @@
 import torch
 from torch import nn
 
-def focal_loss(pred, gt):
+def focal_loss(pred, gt, pos_threshold=0.5):
     alpha = 2
     beta = 4
-    pos_inds = gt.eq(1)
-    neg_inds = gt.lt(1)
+    pos_inds = gt.ge(pos_threshold)
+    neg_inds = gt.lt(pos_threshold)
 
     neg_weights = torch.pow(1 - gt[neg_inds], beta)
     loss = 0
