@@ -135,13 +135,18 @@ def crop_with_ctx_and_save(image_id, bbox, label, img_src_dir, img_dst_dir, radi
         
         
         
-def copy_dataset(annotations_file, src_dir, dst_dir, fraction= 1.0, max_index = None):
+def copy_dataset(annotations_file, src_dir, dst_dir, fraction= 1.0, index_range = None):
     df = pd.read_csv(annotations_file)
     if fraction < 1.0:
         df =df.sample(frac=fraction).reset_index(drop=True)
-    if max_index is not None:
-        max_index = min(max_index, df.shape[0])
-        df = df[:max_index]
+    data_range = None
+    if index_range is not None:
+        if isinstance(index_range, int) :
+            data_range = (0, min(max_index, df.shape[0]))
+        elif isinstance(index_range, tuple):
+            data_range = index_range
+    if data_range is not None:
+        df = df[index_range[0]:index_range[1]]
     # Create the destination directory if it doesn't exist
     os.makedirs(dst_dir, exist_ok=True)
     print(f'copying {df.shape[0]} images')
