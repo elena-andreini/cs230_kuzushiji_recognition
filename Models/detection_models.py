@@ -1,11 +1,13 @@
 import torch
 from torch import nn
 import torchvision.models as models
+from torchvision.models import ResNet18_Weights
+import numpy as np
 
 class CenterNet(nn.Module):
     def __init__(self, num_classes=1, backbone_name='resnet18'):
         super(CenterNet, self).__init__()
-        self.backbone = models.__dict__[backbone_name](pretrained=True)
+        self.backbone = models.__dict__[backbone_name](weights=ResNet18_Weights.DEFAULT)
         self.backbone = nn.Sequential(*list(self.backbone.children())[:-5])
         # Adjust the number of output channels
         feature_dim = 64  # Output feature dimension of resnet18

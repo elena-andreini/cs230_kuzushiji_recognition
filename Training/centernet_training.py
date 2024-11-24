@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import torch
 import torchvision
 import cv2
+import numpy as np
 import torch.nn as nn
 import torchvision.models as models
 from torchvision import transforms
@@ -12,6 +13,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from DataSets.visualization import show_images_and_boxes
+from Losses.centernet_losses import centernet_loss
 
 # from google.colab import drive
 # drive.mount('/content/drive')
