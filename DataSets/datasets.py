@@ -181,20 +181,21 @@ class KuzushijiCenterNetDataset(Dataset):
         return torch.tensor(heatmap, dtype=torch.float32), torch.tensor(offset, dtype=torch.float32), torch.tensor(size, dtype=torch.float32)
         
         
-def create_centernet_ground_truth(bboxes, img_shape, down_ratio):
+def create_centernet_ground_truth(bboxes, img_shape, down_ratio, epsilon = 1e-6):
         heatmap = np.zeros((1, img_shape[1] // down_ratio, img_shape[2] // down_ratio))
         offset = np.zeros((2, img_shape[1] // down_ratio, img_shape[2] // down_ratio))
         size = np.zeros((2, img_shape[1] // down_ratio, img_shape[2] // down_ratio))
+        heatmap = create_heatmap_with_gaussian(bboxes, img_shape, down_ratio)
         for bbox in bboxes:
             x, y, w, h = bbox
 
             center_x, center_y = int(x + w / 2) // down_ratio, int(y + h / 2) // down_ratio
 
-            heatmap[0, center_y, center_x] = 1
+            #heatmap[0, center_y, center_x] = 1
             offset[0, center_y, center_x] = (x + w / 2) / down_ratio - center_x
             offset[1, center_y, center_x] = (y + h / 2) / down_ratio - center_y
-            size[0, center_y, center_x] = w / down_ratio
-            size[1, center_y, center_x] = h / down_ratio
+            size[0, center_y, center_x] = np.log(max(w / down_ratio, epsilon))
+            size[1, center_y, center_x] = np.log(max(h / down_ratio, epsilon))
 
         return torch.tensor(heatmap, dtype=torch.float32), torch.tensor(offset, dtype=torch.float32), torch.tensor(size, dtype=torch.float32)
         
