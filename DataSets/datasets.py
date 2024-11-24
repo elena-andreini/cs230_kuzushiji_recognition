@@ -61,10 +61,14 @@ def draw_gaussian(heatmap, center, sigma=2):
     img_x = max(0, ul[0]), min(br[0], w)
     img_y = max(0, ul[1]), min(br[1], h)
 
+    # heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]] = np.maximum(
+        # heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]],
+        # g[g_y[0]:g_y[1], g_x[0]:g_x[1]]
+    # )
     heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]] = np.maximum(
-        heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]],
-        g[g_y[0]:g_y[1], g_x[0]:g_x[1]]
-    )
+    heatmap[img_y[0]:img_y[1], img_x[0]:img_x[1]],
+    g[img_y[0]:img_y[1], img_x[0]:img_x[1]])
+
 
     return heatmap
 
