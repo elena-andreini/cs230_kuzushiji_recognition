@@ -58,9 +58,12 @@ def decode_heatmap(heatmap, offset, size, ratio = 4.0, threshold=0.5):
         adjusted_y = y_indices.float() + offset_b[1, y_indices, x_indices]
 
         # Use the size to determine width and height
-        widths = torch.exp(size_b[0, y_indices, x_indices])
-        heights = torch.exp(size_b[1, y_indices, x_indices])
-
+        #widths = torch.exp(size_b[0, y_indices, x_indices])
+        #heights = torch.exp(size_b[1, y_indices, x_indices])
+        
+        widths = size_b[0, y_indices, x_indices]
+        heights = size_b[1, y_indices, x_indices]
+        
         # Create bounding boxes for the current image
         boxes = []
         for i in range(len(adjusted_x)):

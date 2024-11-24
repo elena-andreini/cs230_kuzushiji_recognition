@@ -182,9 +182,12 @@ class KuzushijiCenterNetDataset(Dataset):
             heatmap[0, center_y, center_x] = 1
             offset[0, center_y, center_x] = (x + w / 2) / self.down_ratio - center_x
             offset[1, center_y, center_x] = (y + h / 2) / self.down_ratio - center_y
-            size[0, center_y, center_x] = np.log(max(w / self.down_ratio, epsilon))
-            size[1, center_y, center_x] = np.log(max(h / self.down_ratio, epsilon))
-        smooth_tensors_with_gaussian(centers, heatmap, offset, size)
+            #size[0, center_y, center_x] = np.log(max(w / self.down_ratio, epsilon))
+            #size[1, center_y, center_x] = np.log(max(h / self.down_ratio, epsilon))
+            size[0, center_y, center_x] = w / self.down_ratio
+            size[1, center_y, center_x] = h / self.down_ratio
+            
+        #smooth_tensors_with_gaussian(centers, heatmap, offset, size)
         
         return torch.tensor(heatmap, dtype=torch.float32), torch.tensor(offset, dtype=torch.float32), torch.tensor(size, dtype=torch.float32)
         
@@ -202,9 +205,12 @@ def create_centernet_ground_truth(bboxes, img_shape, down_ratio, epsilon = 1e-6)
             heatmap[0, center_y, center_x] = 1
             offset[0, center_y, center_x] = (x + w / 2) / down_ratio - center_x
             offset[1, center_y, center_x] = (y + h / 2) / down_ratio - center_y
-            size[0, center_y, center_x] = np.log(max(w / down_ratio, epsilon))
-            size[1, center_y, center_x] = np.log(max(h / down_ratio, epsilon))
-        smooth_tensors_with_gaussian(centers, heatmap, offset, size)
+            #size[0, center_y, center_x] = np.log(max(w / self.down_ratio, epsilon))
+            #size[1, center_y, center_x] = np.log(max(h / self.down_ratio, epsilon))
+            size[0, center_y, center_x] = w / down_ratio
+            size[1, center_y, center_x] = h / down_ratio
+            
+        #smooth_tensors_with_gaussian(centers, heatmap, offset, size)
         
         return torch.tensor(heatmap, dtype=torch.float32), torch.tensor(offset, dtype=torch.float32), torch.tensor(size, dtype=torch.float32)
         
