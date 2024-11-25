@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from DataSets.datasets import draw_gaussian
 
 def focal_loss(pred, gt, pos_threshold=0.5):
     alpha = 2
@@ -42,18 +43,20 @@ def huber_loss(pred, target, delta=1.0):
 
 def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, gt_size, pos_threshold=1.0):
     # Count the number of keypoints 
-    #num_pos = gt_heatmap.gt(pos_threshold).float().sum()
+    num_pos = gt_heatmap.gt(pos_threshold).float().sum()
+    pos_mask = gt_heatmap.gt(pos_threshold)
     heatmap_loss = focal_loss(pred_heatmap, gt_heatmap, pos_threshold=pos_threshold)
     # Calculate offset loss and size loss 
-    # if num_pos > 0: 
-        # offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / num_pos
-        # size_loss = nn.functional.mse_loss(pred_size, gt_size, reduction='sum') / num_pos        
-    # else: 
-        # offset_loss = torch.tensor(0.0, device=pred_heatmap.device) 
-        # size_loss = torch.tensor(0.0, device=pred_heatmap.device) 
-        
+    if num_pos > 0: 
+        offset_loss = nn.functional.mse_loss(pred_offset[pos_mask], gt_offset[pos_mask], reduction='sum') / num_pos
+        size_loss = nn.functional.mse_loss(pred_size[pos_mask], gt_size[pos_mask], reduction='sum') / num_pos        
+    else: 
+        offset_loss = torch.tensor(0.0, device=pred_heatmap.device) 
+        size_loss = torch.tensor(0.0, device=pred_heatmap.device) 
+       
     offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / gt_heatmap.sum()
     #size_loss = nn.functional.mse_loss(pred_size, gt_size, reduction='sum') / gt_heatmap.sum()
     #size_loss = adaptive_size_loss(pred_size, gt_size) / gt_heatmap.sum()
-    size_loss = huber_loss(pred_size, gt_size)
+    #size_loss = huber_loss(pred_size, gt_size)
+    
     return heatmap_loss + offset_loss +  size_loss
