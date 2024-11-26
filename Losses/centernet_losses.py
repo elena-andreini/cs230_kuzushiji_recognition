@@ -44,7 +44,7 @@ def huber_loss(pred, target, delta=1.0):
 def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, gt_size, pos_threshold=1.0):
     # Count the number of keypoints 
     num_pos = gt_heatmap.gt(pos_threshold).float().sum()
-    pos_mask = gt_heatmap.gt(pos_threshold)
+    pos_mask = gt_heatmap.gt(pos_threshold).expand(-1, 2, -1, -1)
     heatmap_loss = focal_loss(pred_heatmap, gt_heatmap, pos_threshold=pos_threshold)
     # Calculate offset loss and size loss 
     if num_pos > 0: 
@@ -54,7 +54,7 @@ def centernet_loss(pred_heatmap, pred_offset, pred_size, gt_heatmap, gt_offset, 
         offset_loss = torch.tensor(0.0, device=pred_heatmap.device) 
         size_loss = torch.tensor(0.0, device=pred_heatmap.device) 
        
-    offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / gt_heatmap.sum()
+    #offset_loss = nn.functional.mse_loss(pred_offset, gt_offset, reduction='sum') / gt_heatmap.sum()
     #size_loss = nn.functional.mse_loss(pred_size, gt_size, reduction='sum') / gt_heatmap.sum()
     #size_loss = adaptive_size_loss(pred_size, gt_size) / gt_heatmap.sum()
     #size_loss = huber_loss(pred_size, gt_size)
