@@ -113,10 +113,10 @@ class KuzushijiDualDataset(Dataset):
         ctx_image_path = row['ctx_path']
         char_image = cv2.imread(str(char_image_path))
         ctx_image = cv2.imread(str(ctx_image_path))
-        char_padding = ImageTools.utils.calculate_padding(char_image)
-        ctx_padding = ImageTools.utils.calculate_padding(ctx_image)
-        char_image = ImageTools.utils.edge_aware_pad(char_image, char_padding)
-        ctx_image = ImageTools.utils.edge_aware_pad(ctx_image, ctx_padding)
+        char_padding = calculate_padding(char_image)
+        ctx_padding = calculate_padding(ctx_image)
+        char_image = edge_aware_pad(char_image, char_padding)
+        ctx_image = edge_aware_pad(ctx_image, ctx_padding)
         if self.char_transform:
             char_image = self.char_transform(char_image)
         if self.ctx_transform:
