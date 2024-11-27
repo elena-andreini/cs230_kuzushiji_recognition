@@ -38,7 +38,7 @@ class ContextAwareModel(nn.Module):
 
 class SelfMHAttention(nn.Module):
     def __init__(self, embed_dim, num_heads):
-        super(SelfAttention, self).__init__()
+        super(SelfMHAttention, self).__init__()
         self.multihead_attn = nn.MultiheadAttention(embed_dim, num_heads)
         self.proj_value = nn.Conv2d(embed_dim, embed_dim, kernel_size=1)
 
