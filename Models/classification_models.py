@@ -36,6 +36,36 @@ class ContextAwareModel(nn.Module):
         attended_features = self.attention(features)
         return attended_features
 
+class SelfMHAttention(nn.Module):
+    def __init__(self, embed_dim, num_heads):
+        super(SelfAttention, self).__init__()
+        self.multihead_attn = nn.MultiheadAttention(embed_dim, num_heads)
+        self.proj_value = nn.Conv2d(embed_dim, embed_dim, kernel_size=1)
+
+    def forward(self, x):
+        batch_size, channels, width, height = x.size()
+        # Reshape from (B, C, W, H) to (W*H, B, C)
+        x = x.view(batch_size, channels, -1).permute(2, 0, 1)
+        # MultiheadAttention forward pass
+        attn_output, _ = self.multihead_attn(x, x, x)
+        # Reshape back to (B, C, W, H)
+        attn_output = attn_output.permute(1, 2, 0).view(batch_size, channels, width, height)
+        # Apply projection and residual connection
+        out = self.proj_value(attn_output) + x.permute(1, 2, 0).view(batch_size, channels, width, height)
+        return out
+        
+        
+class ContextAwareModel2(nn.Module):
+    def __init__(self, base_model, embed_dim, num_heads):
+        super(ContextAwareModel2, self).__init__()
+        self.base_model = base_model
+        self.attention = SelfMHAttention(embed_dim=embed_dim, num_heads=num_heads)
+
+    def forward(self, x):
+        features = self.base_model(x)
+        attended_features = self.attention(features)
+        return attended_features
+
 
 
 
