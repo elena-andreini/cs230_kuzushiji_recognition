@@ -270,7 +270,9 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
     cropping patches from full page images. 
     Only training examples belonging the classes are generated
     """
+    total = len(df)
     data = [[], [], []]
+    counter = 0
     for _, row in df.iterrows():
         image_id = row['image_id']
         aa = parse_annotations(row['labels'])
@@ -288,7 +290,9 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
         data[0].append(np.array(im1)[:, 0])
         data[1].append(np.array(im1)[:, 1])
         data[2].append(np.array(im2)[:, 1])
-        print(f'image {image_id} cropped')
+        counter += 1
+        if counter%20 == 0:
+            print(f'processed {counter}/{total} images')
     proc_df = pd.DataFrame(zip(*data), columns=['label', 'char_path', 'ctx_path'])
     proc_df.to_csv(dst_annotations_path)
 
