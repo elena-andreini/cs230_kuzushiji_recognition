@@ -3,6 +3,7 @@ import os
 import shutil
 from sklearn.model_selection import train_test_split
 import pandas as pd
+import numpy as np
 from ImageTools import *
 
 def parse_annotations(label_string):
@@ -77,7 +78,7 @@ def crop_boxes_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_dir):
     img = cv2.imread(p)    
     image_dst_paths = []
     for item  in bboxes_and_labels:
-        bbox = item[:-1]
+        bbox = item[:-1][0]
         label = item[-1]
         x1 = min(max(0 , bbox[0]), img.shape[1])
         y1 = min(max(0, bbox[1]), img.shape[0])
@@ -95,17 +96,17 @@ def crop_boxes_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_dir):
         if not result:
           print(f'could not save image {image_dst_path}')
         else :
-          dst_paths.append([label, image_dst_path])
+          image_dst_paths.append([label, image_dst_path])
     return image_dst_paths
     
-def crop_boxes_ctx_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_dir):
+def crop_boxes_ctx_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_dir, radius=2):
     p = os.path.join(img_src_dir, image_id + '.jpg')
     if not os.path.exists(p):
         return
     img = cv2.imread(p)    
     image_dst_paths = []
     for item  in bboxes_and_labels:
-        bbox = item[:-1]
+        bbox = item[:-1][0]
         label = item[-1]
         x1 = max(0, bbox[0] - radius * bbox[2])
         x2 = min(img.shape[1], bbox[0] + (radius+1) * bbox[2])
@@ -116,13 +117,13 @@ def crop_boxes_ctx_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_di
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
         else :
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
-        image_name = f'{image_id}_label_{x1}_{y1}_{x2 - x1}_{y2-y1}_ctx.png'
+        image_name = f'{label}_{image_id}_{x1}_{y1}_{x2 - x1}_{y2-y1}_ctx.png'
         image_dst_path = os.path.join(img_dst_dir, image_name)
         result = cv2.imwrite(image_dst_path, cropped_img)
         if not result:
           print(f'could not save image {image_dst_path}')
         else :
-          dst_paths.append([label, image_dst_path])
+          image_dst_paths.append([label, image_dst_path])
     return image_dst_paths
            
 def crop_and_save(image_id, bbox, label, img_src_dir, img_dst_dir):
@@ -255,12 +256,12 @@ def generate_char_dataset(df, classes, full_images_path, char_images_dst_path, c
         im1 = crop_boxes_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)
-        data[0].append(im1[:, 0])
-        data[1].append(im1[:, 1])
+        data[0].append(np.array(im1)[:, 0])
+        data[1].append(np.array(im1)[:, 1])
 
 
-        proc_df = pd.DataFrame(data, columns=['label', 'char_path', 'ctx_path'])
-        proc_df.to_csv(dst_annotations_path)
+    proc_df = pd.DataFrame(zip(*data), columns=['label', 'char_path', 'ctx_path'])
+    proc_df.to_csv(dst_annotations_path)
 
 
 def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_path):
@@ -284,12 +285,12 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
         if len(im1) != len(im2):
             print(f'problems cropping image {image_id}')
             continue        
-        data[0].append(im1[:, 0])
-        data[1].append(im1[:, 1])
-        data[2].append(im2[:, 1])
-
-        proc_df = pd.DataFrame(data, columns=['label', 'char_path', 'ctx_path'])
-        proc_df.to_csv(dst_annotations_path)
+        data[0].append(np.array(im1)[:, 0])
+        data[1].append(np.array(im1)[:, 1])
+        data[2].append(np.array(im2)[:, 1])
+        print(f'image {image_id} cropped')
+    proc_df = pd.DataFrame(zip(*data), columns=['label', 'char_path', 'ctx_path'])
+    proc_df.to_csv(dst_annotations_path)
 
 
 def split_classification_dataset(annotations_file, train_annotation_dst_path, valid_annotation_dst_path):
