@@ -67,7 +67,64 @@ def crop_images(annotations_file, img_src_dir, img_dst_dir, data_filter = None):
             image_name = f'{image_id}_{lab}_{x1}_{y1}_{x2 - x1}_{y2-y1}.png'
             image_dst_path = os.path.join(img_dst_dir, image_name)
             cv2.imwrite(image_dst_path, cropped_img)
-            
+           
+
+
+def crop_boxes_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_dir):
+    p = os.path.join(img_src_dir, image_id + '.jpg')
+    if not os.path.exists(p):
+        return
+    img = cv2.imread(p)    
+    image_dst_paths = []
+    for item  in bboxes_and_labels:
+        bbox = item[:-1]
+        label = item[-1]
+        x1 = min(max(0 , bbox[0]), img.shape[1])
+        y1 = min(max(0, bbox[1]), img.shape[0])
+        x2 = min(x1 +  bbox[2], img.shape[1])
+        y2 = min(y1 + bbox[3], img.shape[0])
+        cropped_img = img[y1 : y2, x1 : x2]
+        if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
+            cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
+        else :
+            cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
+        image_name = f'{label}_{image_id}_{x1}_{y1}_{x2 - x1}_{y2-y1}.png'
+        image_dst_path = os.path.join(img_dst_dir, image_name)
+        #print(f'saving image {image_dst_path}')
+        result = cv2.imwrite(image_dst_path, cropped_img)
+        if not result:
+          print(f'could not save image {image_dst_path}')
+        else :
+          dst_paths.append([label, image_dst_path])
+    return image_dst_paths
+    
+def crop_boxes_ctx_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_dir):
+    p = os.path.join(img_src_dir, image_id + '.jpg')
+    if not os.path.exists(p):
+        return
+    img = cv2.imread(p)    
+    image_dst_paths = []
+    for item  in bboxes_and_labels:
+        bbox = item[:-1]
+        label = item[-1]
+        x1 = max(0, bbox[0] - radius * bbox[2])
+        x2 = min(img.shape[1], bbox[0] + (radius+1) * bbox[2])
+        y1 = max(0, bbox[1] - radius * bbox[3])
+        y2 = min(img.shape[0], bbox[1] + (radius+1) * bbox[3])
+        cropped_img = img[y1 : y2, x1 : x2]
+        if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
+            cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
+        else :
+            cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
+        image_name = f'{image_id}_label_{x1}_{y1}_{x2 - x1}_{y2-y1}_ctx.png'
+        image_dst_path = os.path.join(img_dst_dir, image_name)
+        result = cv2.imwrite(image_dst_path, cropped_img)
+        if not result:
+          print(f'could not save image {image_dst_path}')
+        else :
+          dst_paths.append([label, image_dst_path])
+    return image_dst_paths
+           
 def crop_and_save(image_id, bbox, label, img_src_dir, img_dst_dir):
     p = os.path.join(img_src_dir, image_id + '.jpg')
     if not os.path.exists(p):
@@ -182,6 +239,58 @@ def generate_classification_dataset(df, classes, full_images_path, char_images_d
 
         proc_df = pd.DataFrame(data, columns=['label', 'char_path', 'ctx_path'])
         proc_df.to_csv(dst_annotations_path)
+
+
+def generate_char_dataset(df, classes, full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_path):
+    """
+    Generates the training data for the classification model
+    cropping patches from full page images. 
+    Only training examples belonging the classes are generated
+    """
+    data = [[], []]
+    for _, row in df.iterrows():
+        image_id = row['image_id']
+        aa = dataset_preprocessing.parse_annotations(row['labels'])
+
+        im1 = dataset_preprocessing.crop_boxes_and_save(image_id, aa
+                                              full_images_path,
+                                              char_images_dst_path)
+        data[0].append(im1[:, 0])
+        data[1].append(im1[:, 1])
+
+
+        proc_df = pd.DataFrame(data, columns=['label', 'char_path', 'ctx_path'])
+        proc_df.to_csv(dst_annotations_path)
+
+
+def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_path):
+    """
+    Generates the training data for the classification model
+    cropping patches from full page images. 
+    Only training examples belonging the classes are generated
+    """
+    data = [[], [], []]
+    for _, row in df.iterrows():
+        image_id = row['image_id']
+        aa = dataset_preprocessing.parse_annotations(row['labels'])
+
+        im1 = dataset_preprocessing.crop_boxes_and_save(image_id, aa
+                                              full_images_path,
+                                              char_images_dst_path)
+        im2 = dataset_preprocessing.crop_boxes_ctx_and_save(image_id, aa
+                                              full_images_path,
+                                              char_images_dst_path)                                     
+          
+        if len(im1) != len(im2):
+            print(f'problems cropping image {image_id}')
+            continue        
+        data[0].append(im1[:, 0])
+        data[1].append(im1[:, 1])
+        data[2].append(im2[:, 1])
+
+        proc_df = pd.DataFrame(data, columns=['label', 'char_path', 'ctx_path'])
+        proc_df.to_csv(dst_annotations_path)
+
 
 def split_classification_dataset(annotations_file, train_annotation_dst_path, valid_annotation_dst_path):
     pd.read_csv(annotations_file)
