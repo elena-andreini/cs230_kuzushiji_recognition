@@ -223,14 +223,14 @@ def generate_classification_dataset(df, classes, full_images_path, char_images_d
     data = []
     for _, row in df.iterrows():
         image_id = row['image_id']
-        aa = dataset_preprocessing.parse_annotations(row['labels'])
+        aa = parse_annotations(row['labels'])
         for a in aa:
           if a[1] not in classes:
             continue
-          im1 = dataset_preprocessing.crop_and_save(image_id, a[0], a[1],
+          im1 = crop_and_save(image_id, a[0], a[1],
                                               full_images_path,
                                               char_images_dst_path)
-          im2 = dataset_preprocessing.crop_with_ctx_and_save(image_id, a[0], a[1],
+          im2 = crop_with_ctx_and_save(image_id, a[0], a[1],
                                               full_images_path,
                                               context_images_dst_path)
 
@@ -250,9 +250,9 @@ def generate_char_dataset(df, classes, full_images_path, char_images_dst_path, c
     data = [[], []]
     for _, row in df.iterrows():
         image_id = row['image_id']
-        aa = dataset_preprocessing.parse_annotations(row['labels'])
+        aa = parse_annotations(row['labels'])
 
-        im1 = dataset_preprocessing.crop_boxes_and_save(image_id, aa,
+        im1 = crop_boxes_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)
         data[0].append(im1[:, 0])
@@ -272,12 +272,12 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
     data = [[], [], []]
     for _, row in df.iterrows():
         image_id = row['image_id']
-        aa = dataset_preprocessing.parse_annotations(row['labels'])
+        aa = parse_annotations(row['labels'])
 
-        im1 = dataset_preprocessing.crop_boxes_and_save(image_id, aa,
+        im1 = crop_boxes_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)
-        im2 = dataset_preprocessing.crop_boxes_ctx_and_save(image_id, aa,
+        im2 = crop_boxes_ctx_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)                                     
           
