@@ -252,7 +252,7 @@ def generate_char_dataset(df, classes, full_images_path, char_images_dst_path, c
         image_id = row['image_id']
         aa = dataset_preprocessing.parse_annotations(row['labels'])
 
-        im1 = dataset_preprocessing.crop_boxes_and_save(image_id, aa
+        im1 = dataset_preprocessing.crop_boxes_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)
         data[0].append(im1[:, 0])
@@ -274,10 +274,10 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
         image_id = row['image_id']
         aa = dataset_preprocessing.parse_annotations(row['labels'])
 
-        im1 = dataset_preprocessing.crop_boxes_and_save(image_id, aa
+        im1 = dataset_preprocessing.crop_boxes_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)
-        im2 = dataset_preprocessing.crop_boxes_ctx_and_save(image_id, aa
+        im2 = dataset_preprocessing.crop_boxes_ctx_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)                                     
           
