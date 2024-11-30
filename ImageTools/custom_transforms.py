@@ -55,8 +55,11 @@ class PercentileNormalize:
 
     def __call__(self, image):
         # Convert the image to a numpy array
-        image_np = np.array(image)
-
+        if isinstance(image, torch.Tensor): 
+          image_np = image.numpy() 
+        else: 
+          image_np = np.array(image)
+      
         # Compute the lower and upper percentiles
         lower = np.percentile(image_np, self.lower_percentile)
         upper = np.percentile(image_np, self.upper_percentile)

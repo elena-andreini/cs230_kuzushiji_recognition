@@ -242,7 +242,7 @@ def generate_classification_dataset(df, classes, full_images_path, char_images_d
         proc_df.to_csv(dst_annotations_path)
 
 
-def generate_char_dataset(df,  full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_file):
+def generate_char_dataset(df,  full_images_path, char_images_dst_path, dst_annotations_file):
     """
     Generates the training data for the classification model
     cropping patches from full page images. 
@@ -256,12 +256,11 @@ def generate_char_dataset(df,  full_images_path, char_images_dst_path, context_i
         im1 = crop_boxes_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)
-        data[0].append(np.array(im1)[:, 0])
-        data[1].append(np.array(im1)[:, 1])
+        data[0].extend([item[0] for item in im1])
+        data[1].extend([item[1] for item in im1 ])
 
-
-    proc_df = pd.DataFrame(zip(*data), columns=['label', 'char_path'])
-    proc_df.to_csv(dst_annotations_path)
+    proc_df = pd.DataFrame(list(zip(*data)), columns=['label', 'char_path'])
+    proc_df.to_csv(dst_annotations_file)
 
 
 def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_path):
@@ -287,9 +286,9 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
         if len(im1) != len(im2):
             print(f'problems cropping image {image_id}')
             continue        
-        data[0].append(np.array(im1)[:, 0])
-        data[1].append(np.array(im1)[:, 1])
-        data[2].append(np.array(im2)[:, 1])
+        data[0].extend([item[0] for item in im1])
+        data[1].extend([item[1] for item in im1 ])
+        data[2].extend([item[1] for item in im2 ])
         counter += 1
         if counter%20 == 0:
             print(f'processed {counter}/{total} images')
