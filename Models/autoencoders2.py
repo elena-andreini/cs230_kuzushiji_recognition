@@ -18,7 +18,7 @@ class ResNet18Encoder_v2(nn.Module):
 
 class ResNet18Decoder_v2(nn.Module):
     def __init__(self):
-        super(ResNet18Decoder_v2\, self).__init__()
+        super(ResNet18Decoder_v2, self).__init__()
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(128),
