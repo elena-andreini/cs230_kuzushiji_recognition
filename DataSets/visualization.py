@@ -66,9 +66,9 @@ def show_images_and_boxes(imgs, boxes):
         ax.axis('off')
 
 
-def show_images_autoencoder(original, reconstructed, num_images=5):
+def show_images_autoencoder(original, reconstructed):
+    num_images = original.shape[0]
     fig, axes = plt.subplots(2, num_images, figsize=(num_images * 2, 4))
-
     for i in range(num_images):
         # Original images
         ax = axes[0, i]
