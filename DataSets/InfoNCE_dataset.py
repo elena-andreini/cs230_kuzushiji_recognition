@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 import pandas as pd
+import numpy as np
 from PIL import Image
 
 
@@ -10,6 +11,8 @@ class InfoNCEDataset(Dataset):
       self.paths = df['char_path'].to_numpy()
       self.labels = df['label'].to_numpy()
       self.N = N
+      self.transform = transform
+      self.same_transform = same_transform
 
     def __len__(self):
         return len(self.data)
@@ -31,7 +34,7 @@ class InfoNCEDataset(Dataset):
         neg_idxs = []
         neg_labels = []
         attempts = 0
-        while len(neg_idxs) < N:
+        while len(neg_idxs) < self.N:
             neg_idx = idx
             while neg_idx == idx:
                 neg_idx = torch.randint(0, len(self.data), (1,)).item()
@@ -56,8 +59,8 @@ class InfoNCEDataset(Dataset):
             image_collection.append(negative)
         
         original_labels_collection = []
-        original_collection.append(label)
-        original_collection.append(label)
-        original_collection += neg_labels
+        original_labels_collection.append(label)
+        original_labels_collection.append(label)
+        original_labels_collection += neg_labels
         
         return image_collection, original_labels_collection

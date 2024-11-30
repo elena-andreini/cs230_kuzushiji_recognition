@@ -46,7 +46,7 @@ def unfreeze_last_n_modules(model, n):
     if n > len(modules):
         print(f"Warning: The model only has {len(modules)} modules.")
         n = len(modules)
-    print(f'the model has {modules} modules')
+    #print(f'the model has {modules} modules')
     # Unfreeze the last n modules
     for module in modules[-n:]:
         for param in module.parameters():
