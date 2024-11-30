@@ -242,7 +242,7 @@ def generate_classification_dataset(df, classes, full_images_path, char_images_d
         proc_df.to_csv(dst_annotations_path)
 
 
-def generate_char_dataset(df, classes, full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_path):
+def generate_char_dataset(df,  full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_file):
     """
     Generates the training data for the classification model
     cropping patches from full page images. 
@@ -260,7 +260,7 @@ def generate_char_dataset(df, classes, full_images_path, char_images_dst_path, c
         data[1].append(np.array(im1)[:, 1])
 
 
-    proc_df = pd.DataFrame(zip(*data), columns=['label', 'char_path', 'ctx_path'])
+    proc_df = pd.DataFrame(zip(*data), columns=['label', 'char_path'])
     proc_df.to_csv(dst_annotations_path)
 
 
