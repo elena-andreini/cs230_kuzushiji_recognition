@@ -1,5 +1,7 @@
 import torch
 from torch import tensor
+import numpy as np
+
 
 class MinMaxNormalize:
     def __call__(self, tensor):
@@ -42,3 +44,32 @@ class CustomResize:
         # Remove batch dimension
         resized_img = resized_img.squeeze(0)
         return resized_img
+        
+        
+
+
+class PercentileNormalize:
+    def __init__(self, lower_percentile=1, upper_percentile=99):
+        self.lower_percentile = lower_percentile
+        self.upper_percentile = upper_percentile
+
+    def __call__(self, image):
+        # Convert the image to a numpy array
+        image_np = np.array(image)
+
+        # Compute the lower and upper percentiles
+        lower = np.percentile(image_np, self.lower_percentile)
+        upper = np.percentile(image_np, self.upper_percentile)
+
+        # Clip pixel values to the computed percentiles
+        clipped_image = np.clip(image_np, lower, upper)
+
+        # Min-max normalization
+        normalized_image = (clipped_image - lower) / (upper - lower)
+
+        # Convert back to a torch tensor
+        normalized_image_tensor = torch.tensor(normalized_image, dtype=torch.float32)
+
+        return normalized_image_tensor
+
+
