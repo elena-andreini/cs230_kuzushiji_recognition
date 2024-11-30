@@ -17,12 +17,10 @@ class InfoNCELoss(nn.Module):
 		size and can be either an integer or a series of numbers
 
         '''
-		
-		BS = query.shape[0]
-		N = neg.shape[1]
-		
-		logit_pos = torch.nn.functional.cosine_similarity(query.view(BS, -1), pos.view(BS, -1))
-		logit_neg = torch.nn.functinoal.cosine_similarity(query.view(BS, -1), neg.view(BS, N, -1))
+        BS = query.shape[0]
+        N = neg.shape[1]
+        logits_pos = torch.nn.functional.cosine_similarity(query.view(BS, -1), pos.view(BS, -1))
+        logits_neg = torch.nn.functinoal.cosine_similarity(query.view(BS, -1), neg.view(BS, N, -1))
 		
         # Concatenate logits
         logits = torch.cat((logits_pos, logits_neg), dim=1)

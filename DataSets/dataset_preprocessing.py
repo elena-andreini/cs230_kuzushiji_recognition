@@ -215,6 +215,16 @@ def copy_dataset(annotations_file, src_dir, dst_dir, fraction= 1.0, index_range 
          shutil.copy(src_path, dest_path)
         
         
+def copy_dataset_v2(df, src_dir, dst_dir):
+    # Create the destination directory if it doesn't exist
+    os.makedirs(dst_dir, exist_ok=True)
+    print(f'copying {df.shape[0]} images')
+    # Iterate over the dataframe and copy files
+    for file_name in df['image_id']:
+         src_path = os.path.join(src_dir, file_name+'.jpg')
+         dest_path = os.path.join(dst_dir, file_name+'.jpg')
+         shutil.copy(src_path, dest_path)
+        
 def generate_classification_dataset(df, classes, full_images_path, char_images_dst_path, context_images_dst_path, dst_annotations_path):
     """
     Generates the training data for the classification model
