@@ -42,7 +42,7 @@ class InfoNCEDataset(Dataset):
                     neg_idxs.append(neg_idx)
                     neg_labels.append(self.labels[neg_idx])
                     break
-        while len(neg_idxs) < N and len(neg_idxs) > 0:
+        while len(neg_idxs) < self.N and len(neg_idxs) > 0:
             neg_idxs.append(neg_idxs[-1])
             neg_labels.append(neg_labels[-1])
             
@@ -60,4 +60,4 @@ class InfoNCEDataset(Dataset):
         original_collection.append(label)
         original_collection += neg_labels
         
-        return 
+        return image_collection, original_labels_collection
