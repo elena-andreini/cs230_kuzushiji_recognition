@@ -34,33 +34,22 @@ class InfoNCEDataset(Dataset):
         neg_idxs = []
         neg_labels = []
         attempts = 0
-        while len(neg_idxs) < self.N:
-            neg_idx = idx
-            while neg_idx == idx:
-                neg_idx = torch.randint(0, len(self.data), (1,)).item()
-                attempts += 1
-                if attempts > 3 * self.N :
-                    break
-                if self.labels[neg_idx] != label:
-                    neg_idxs.append(neg_idx)
-                    neg_labels.append(self.labels[neg_idx])
-                    break
-        while len(neg_idxs) < self.N and len(neg_idxs) > 0:
-            neg_idxs.append(neg_idxs[-1])
-            neg_labels.append(neg_labels[-1])
-            
+        negative_indices = self.data[self.data['label'] != label].index.to_numpy()
+        #print(f'negative indices {negative_indices[:10]}')
+        choice = np.random.choice(negative_indices, self.N)
+        #handle edge case where there are not enough negatives
         image_collection = []
         image_collection.append(anchor)
         image_collection.append(positive)
-        for ni in neg_idxs:
+        for ni in choice:
             negative = Image.open(self.paths[ni])
             if self.transform:
                 negative = self.transform(negative)
             image_collection.append(negative)
-        
+            neg_labels.append(self.labels[ni])
         original_labels_collection = []
         original_labels_collection.append(label)
         original_labels_collection.append(label)
         original_labels_collection += neg_labels
-        
+        #print(f'collection size {len(original_labels_collection)}')
         return image_collection, original_labels_collection
