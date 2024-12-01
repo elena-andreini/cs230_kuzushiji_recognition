@@ -1,7 +1,7 @@
 import torch
 from torch import tensor
 import numpy as np
-
+from PIL import Image
 
 class MinMaxNormalize:
     def __call__(self, tensor):
@@ -54,10 +54,11 @@ class PercentileNormalize:
         self.upper_percentile = upper_percentile
 
     def __call__(self, image):
+        pil_image = isinstance(image, Image.Image)
         # Convert the image to a numpy array
         if isinstance(image, torch.Tensor): 
           image_np = image.numpy() 
-        else: 
+        else:
           image_np = np.array(image)
       
         # Compute the lower and upper percentiles
@@ -71,8 +72,10 @@ class PercentileNormalize:
         normalized_image = (clipped_image - lower) / (upper - lower)
 
         # Convert back to a torch tensor
-        normalized_image_tensor = torch.tensor(normalized_image, dtype=torch.float32)
-
-        return normalized_image_tensor
+        #normalized_image_tensor = torch.tensor(normalized_image, dtype=torch.float32)
+        if pil_image:
+          #print(f'converting to PIL image of shape {normalized_image.shape} woth dtype {normalized_image.dtype}')
+          normalized_image = Image.fromarray((255 * normalized_image).astype(np.uint8))
+        return normalized_image
 
 
