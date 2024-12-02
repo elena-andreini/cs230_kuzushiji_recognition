@@ -26,8 +26,13 @@ def per_class_accuracy(y_true, output, num_classes):
 def train_dual_branch(model, train_dataloader, valid_dataloader, criterion, optimizer, labels_to_int,  writer, epochs=10):
     model = model.to(device)
     model.train()
+    best_loss = float('inf')
+    best_model_wts = None
     for epoch in range(epochs):
         total_loss = 0
+        train_correct = 0
+        train_samples = 0
+        train_accuracy = 0
         class_accuracies = {cls: [] for cls in range(num_classes)}
         for char_input, context_input, label in train_dataloader:
             optimizer.zero_grad()
@@ -42,12 +47,20 @@ def train_dual_branch(model, train_dataloader, valid_dataloader, criterion, opti
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
+            train_correct += calculate_accuracy(output, integer_labels) * char_input.size(0)
+            train_samples += char_input.size(0)
+            train_accuracy = train_correct / val_samples
             # Calculate per-class accuracy
             batch_class_accuracies = per_class_accuracy(integer_labels, output, num_classes)
             for cls in batch_class_accuracies:
                 if not np.isnan(batch_class_accuracies[cls]):
                     class_accuracies[cls].append(batch_class_accuracies[cls])
         avg_train_loss = total_loss / len(train_dataloader)
+
+        if avg_train_loss < best_loss:
+          best_loss = avg_train_loss
+          best_model_wts = model.state_dict().copy()
+
         writer.add_scalar('Train Loss', avg_train_loss, epoch)
          # Calculate average per-class accuracy for the epoch
         epoch_class_accuracies = {cls: np.mean(class_accuracies[cls]) if class_accuracies[cls]
@@ -56,7 +69,7 @@ def train_dual_branch(model, train_dataloader, valid_dataloader, criterion, opti
         for cls, acc in epoch_class_accuracies.items():
           if acc is not None:
             writer.add_scalar(f'Class_{cls}_Accuracy', acc, epoch)
-
+        writer.add_scalar('Train Accuracy', train_accuracy, epoch)
         # Validation
         model.eval()
         val_loss = 0
