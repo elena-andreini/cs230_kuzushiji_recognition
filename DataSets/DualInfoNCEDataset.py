@@ -9,8 +9,8 @@ class DualInfoNCEDataset(Dataset):
     def __init__(self, df_char_cxt, N=1, transform = None, same_transform = None):
       self.data = df_char_cxt
       self.char_paths = df_char_cxt['char_path'].to_numpy()
-      self.cxt_paths = df_char_cxt['cxt_path'].to_numpy()
-      self.labels = df['label'].to_numpy()
+      self.cxt_paths = df_char_cxt['ctx_path'].to_numpy()
+      self.labels = df_char_cxt['label'].to_numpy()
       self.N = N
       self.transform = transform
       self.same_transform = same_transform
@@ -19,9 +19,13 @@ class DualInfoNCEDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        anchor = Image.open(self.paths[idx])
+        char_anchor = Image.open(self.char_paths[idx])
         if self.transform is not None:
-          anchor = self.transform(anchor)
+          char_anchor = self.transform(char_anchor)
+        ctx_anchor = Image.open(self.ctx_paths[idx])
+        if self.transform is not None:
+          ctx_anchor = self.transform(ctx_anchor)
+        
         label = self.labels[idx]
         
         # Find a positive sample (same example with same transformation as anchor)
@@ -45,9 +49,12 @@ class DualInfoNCEDataset(Dataset):
         choice = np.random.choice(negative_indices, self.N)
         #handle edge case where there are not enough negatives
         image_collection = []
-        cxt_image_collection  = []
-        image_collection.append(anchor)
-        image_collection.append(positive)
+        ctx_image_collection  = []
+        image_collection.append(char_anchor)
+        image_collection.append(char_positive)
+        ctx_image_collection.append(ctx_anchor)
+        ctx_image_collection.append(cxt_positive)
+
         for ni in choice:
             char_negative = Image.open(self.char_paths[ni])
             if self.transform:
@@ -57,7 +64,7 @@ class DualInfoNCEDataset(Dataset):
             if self.transform:
                 cxt_negative = self.transform(cxt_negative)
             image_collection.append(char_negative)
-            cxt_image_collection.append(cxt_negative)
+            ctx_image_collection.append(cxt_negative)
             neg_labels.append(self.labels[ni])
             
         original_labels_collection = []
@@ -65,4 +72,4 @@ class DualInfoNCEDataset(Dataset):
         original_labels_collection.append(label)
         original_labels_collection += neg_labels
         #print(f'collection size {len(original_labels_collection)}')
-        return image_collection, cxt_image_collection, original_labels_collection
+        return image_collection, ctx_image_collection, original_labels_collection
