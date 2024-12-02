@@ -125,14 +125,13 @@ class KuzushijiSimpleClassificationModel(nn.Module):
         #self.fc = nn.Linear(1280, 128)  # When using a single branch
         self.classifier = nn.Linear(128, num_classes)  # Final classification layer
 
-    def forward(self, char_input, context_input):
+    def forward(self, char_input):
         char_features = self.char_model(char_input).view(char_input.size(0), -1)
-        context_features = self.context_model(context_input).view(context_input.size(0), -1)
-        combined_features = torch.cat((char_features, context_features), dim=1)
-        combined_features = self.fc(combined_features)
-        combined_features = F.relu(combined_features)  # Apply ReLU activation
+        
+        char_features = self.fc(char_features)
+        char_features = F.relu(char_features)  # Apply ReLU activation
         #char_features = self.fc(char_features) # code variation for single branch
         #char_features = F.relu(char_features) #code variation for single branch
-        logits = self.classifier(combined_features)
+        logits = self.classifier(char_features)
         #output = F.softmax(logits, dim=1)  # Apply softmax to get probabilities
         return logits
