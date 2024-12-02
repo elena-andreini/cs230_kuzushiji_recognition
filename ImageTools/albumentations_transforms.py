@@ -33,7 +33,10 @@ class AlbumentationsTransform:
         ])
 
     def __call__(self, img):
-        img = np.array(img)
+        if torch.is_tensor(img):
+            img = img.numpy().T
+        if isinstance(img, Image.Image):
+           img = np.array(img)
         augmented = self.aug_func(image=img)['image']
         return augmented
 

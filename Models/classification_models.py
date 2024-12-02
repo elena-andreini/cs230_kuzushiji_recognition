@@ -90,7 +90,7 @@ class KuzushijiDualModel(nn.Module):
         logits = self.classifier(combined_features)
         output = F.softmax(logits, dim=1)  # Apply softmax to get probabilities
         if return_embeddings:
-            return combined_features
+            return output, combined_features
         else:
             return output
 
