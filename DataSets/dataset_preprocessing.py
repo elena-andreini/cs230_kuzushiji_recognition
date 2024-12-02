@@ -285,7 +285,8 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
     for _, row in df.iterrows():
         image_id = row['image_id']
         aa = parse_annotations(row['labels'])
-
+        if classes is not None:
+          aa = [a for a in aa if a[1] in classes]
         im1 = crop_boxes_and_save(image_id, aa,
                                               full_images_path,
                                               char_images_dst_path)
