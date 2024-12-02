@@ -2,8 +2,8 @@ import pandas as ps
 
 
 class KuzushijiDualDataset(Dataset):
-    def __init__(self, annotations_file, char_transform=None, ctx_transform=None, img_size=256, down_ratio=4, fraction = 1.0):
-        self.annotations = pd.read_csv(annotations_file)
+    def __init__(self, annotations_df, char_transform=None, ctx_transform=None, img_size=256, down_ratio=4, fraction = 1.0):
+        self.annotations = annotations_df
         self.char_transform = char_transform
         self.ctx_transform = ctx_transform
         self.img_size = img_size
