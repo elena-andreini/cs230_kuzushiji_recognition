@@ -94,7 +94,7 @@ class KuzushijiDualModel(nn.Module):
 
 class KuzushijiDualModelContr(nn.Module):
     def __init__(self, char_model, context_model, num_classes):
-        super(KuzushijiDualModel, self).__init__()
+        super(KuzushijiDualModelContr, self).__init__()
         self.char_model = char_model
         self.context_model = context_model
         self.fc = nn.Linear(2560, 128)  # Combine features from both branches
@@ -112,9 +112,9 @@ class KuzushijiDualModelContr(nn.Module):
         logits = self.classifier(combined_features)
         #output = F.softmax(logits, dim=1)  # Apply softmax to get probabilities
         if return_embeddings:
-            return output, combined_features
+            return logits, combined_features
         else :
-            return output
+            return logits
 
 
 class KuzushijiSimpleClassificationModel(nn.Module):
