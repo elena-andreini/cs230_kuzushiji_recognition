@@ -63,7 +63,6 @@ class DualInfoNCEDataset(Dataset):
             ctx_negative = Image.open(self.ctx_paths[ni])
             if self.transform:
                 ctx_negative = self.transform(ctx_negative)
-            image_collection.append(char_negative)
             ctx_image_collection.append(ctx_negative)
             neg_labels.append(self.labels[ni])
             
@@ -71,5 +70,6 @@ class DualInfoNCEDataset(Dataset):
         original_labels_collection.append(label)
         original_labels_collection.append(label)
         original_labels_collection += neg_labels
+
         #print(f'collection size {len(original_labels_collection)}')
         return image_collection, ctx_image_collection, original_labels_collection

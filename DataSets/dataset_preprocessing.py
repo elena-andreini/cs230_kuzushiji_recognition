@@ -304,7 +304,7 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
         if counter%20 == 0:
             print(f'processed {counter}/{total} images')
     proc_df = pd.DataFrame(zip(*data), columns=['label', 'char_path', 'ctx_path'])
-    proc_df.to_csv(dst_annotations_path)
+    proc_df.to_csv(dst_annotations_path, index=False)
 
 
 def split_classification_dataset(annotations_file, train_annotation_dst_path, valid_annotation_dst_path):

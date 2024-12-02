@@ -79,7 +79,7 @@ class KuzushijiDualModel(nn.Module):
         #self.fc = nn.Linear(1280, 128)  # When using a single branch
         self.classifier = nn.Linear(128, num_classes)  # Final classification layer
 
-    def forward(self, char_input, context_input, return_embeddings = False):
+    def forward(self, char_input, context_input):
         char_features = self.char_model(char_input).view(char_input.size(0), -1)
         context_features = self.context_model(context_input).view(context_input.size(0), -1)
         combined_features = torch.cat((char_features, context_features), dim=1)
@@ -89,9 +89,31 @@ class KuzushijiDualModel(nn.Module):
         #char_features = F.relu(char_features) #code variation for single branch
         logits = self.classifier(combined_features)
         output = F.softmax(logits, dim=1)  # Apply softmax to get probabilities
+        return output
+
+
+class KuzushijiDualModelContr(nn.Module):
+    def __init__(self, char_model, context_model, num_classes):
+        super(KuzushijiDualModel, self).__init__()
+        self.char_model = char_model
+        self.context_model = context_model
+        self.fc = nn.Linear(2560, 128)  # Combine features from both branches
+        #self.fc = nn.Linear(1280, 128)  # When using a single branch
+        self.classifier = nn.Linear(128, num_classes)  # Final classification layer
+
+    def forward(self, char_input, context_input, return_embeddings = True):
+        char_features = self.char_model(char_input).view(char_input.size(0), -1)
+        context_features = self.context_model(context_input).view(context_input.size(0), -1)
+        combined_features = torch.cat((char_features, context_features), dim=1)
+        combined_features = self.fc(combined_features)
+        combined_features = F.relu(combined_features)  # Apply ReLU activation
+        #char_features = self.fc(char_features) # code variation for single branch
+        #char_features = F.relu(char_features) #code variation for single branch
+        logits = self.classifier(combined_features)
+        #output = F.softmax(logits, dim=1)  # Apply softmax to get probabilities
         if return_embeddings:
             return output, combined_features
-        else:
+        else :
             return output
 
 

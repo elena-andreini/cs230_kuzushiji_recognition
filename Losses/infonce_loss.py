@@ -20,14 +20,14 @@ class InfoNCELoss(nn.Module):
         BS = query.shape[0]
         N = neg.shape[1]
         logits_pos = torch.nn.functional.cosine_similarity(query.view(BS, -1), pos.view(BS, -1))
-        logits_neg = torch.nn.functinoal.cosine_similarity(query.view(BS, -1), neg.view(BS, N, -1))
+        logits_neg = torch.nn.functional.cosine_similarity(query.view(BS, -1), neg.view(BS,-1))
 		
         # Concatenate logits
-        logits = torch.cat((logits_pos, logits_neg), dim=1)
+        logits = torch.cat((logits_pos.unsqueeze(1), logits_neg.unsqueeze(1)), dim=1)
         
         # Generate labels
        
-        labels = torch.zeros(BS).to(self.device)
+        labels = torch.zeros(BS, dtype=torch.long).to(self.device)
         
         # Cross-entropy loss
         loss = F.cross_entropy(logits / self.temperature, labels, reduction='mean')
