@@ -1,5 +1,5 @@
 import pandas as ps
-
+from torch.utils.data import Dataset
 
 class KuzushijiDualDataset(Dataset):
     def __init__(self, annotations_df, char_transform=None, ctx_transform=None, img_size=256, down_ratio=4, fraction = 1.0):

@@ -36,6 +36,22 @@ def get_kuzushiji_stats(annotations_file):
       sorted_stats = sorted(stats.items(), key=lambda item: item[1], reverse=True)
     return sorted_stats
     
+    
+def get_dataframe_stats(df, key):
+    stats = {}
+    for _, row in df.iterrows():
+      label_string = row[key]
+      tokens = label_string.split()
+      for i in range(0, len(tokens), 5):
+          unicode_char = tokens[i]
+          if unicode_char in stats:
+            stats[unicode_char] +=1
+          else :
+            stats[unicode_char] = 1
+      sorted_stats = sorted(stats.items(), key=lambda item: item[1], reverse=True)
+    return sorted_stats
+
+    
 def unicode_labels_to_ints(annotations_file):
     unicode_labels = get_kuzushiji_labels(annotations_file)
     labels_dict = {}
