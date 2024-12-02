@@ -119,7 +119,7 @@ class KuzushijiDualModelContr(nn.Module):
 
 class KuzushijiSimpleClassificationModel(nn.Module):
     def __init__(self, char_model, num_classes):
-        super(KuzushijiDualModel, self).__init__()
+        super(KuzushijiSimpleClassificationModel, self).__init__()
         self.char_model = char_model
         self.fc = nn.Linear(1280, 128)  # Combine features from both branches
         #self.fc = nn.Linear(1280, 128)  # When using a single branch
