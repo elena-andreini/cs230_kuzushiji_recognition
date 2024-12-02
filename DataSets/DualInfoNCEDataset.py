@@ -6,11 +6,11 @@ from PIL import Image
 
 
 class DualInfoNCEDataset(Dataset):
-    def __init__(self, df_char_cxt, N=1, transform = None, same_transform = None):
-      self.data = df_char_cxt
-      self.char_paths = df_char_cxt['char_path'].to_numpy()
-      self.cxt_paths = df_char_cxt['ctx_path'].to_numpy()
-      self.labels = df_char_cxt['label'].to_numpy()
+    def __init__(self, df_char_ctx, N=1, transform = None, same_transform = None):
+      self.data = df_char_ctx
+      self.char_paths = df_char_ctx['char_path'].to_numpy()
+      self.ctx_paths = df_char_ctx['ctx_path'].to_numpy()
+      self.labels = df_char_ctx['label'].to_numpy()
       self.N = N
       self.transform = transform
       self.same_transform = same_transform
@@ -32,11 +32,11 @@ class DualInfoNCEDataset(Dataset):
         pos_idx = idx
         
         char_positive = Image.open(self.char_paths[pos_idx])
-        cxt_positive = Image.open(self.cxt_paths[pos_idx])
+        ctx_positive = Image.open(self.ctx_paths[pos_idx])
         
         if self.same_transform is not None:
           char_positive = self.same_transform(char_positive)
-          cxt_positive = self.same_transform(cxt_positive)
+          ctx_positive = self.same_transform(ctx_positive)
         
         
                 
@@ -53,18 +53,18 @@ class DualInfoNCEDataset(Dataset):
         image_collection.append(char_anchor)
         image_collection.append(char_positive)
         ctx_image_collection.append(ctx_anchor)
-        ctx_image_collection.append(cxt_positive)
+        ctx_image_collection.append(ctx_positive)
 
         for ni in choice:
             char_negative = Image.open(self.char_paths[ni])
             if self.transform:
                 char_negative = self.transform(char_negative)
             image_collection.append(char_negative)
-            cxt_negative = Image.open(self.cxt_paths[ni])
+            ctx_negative = Image.open(self.ctx_paths[ni])
             if self.transform:
-                cxt_negative = self.transform(cxt_negative)
+                ctx_negative = self.transform(ctx_negative)
             image_collection.append(char_negative)
-            ctx_image_collection.append(cxt_negative)
+            ctx_image_collection.append(ctx_negative)
             neg_labels.append(self.labels[ni])
             
         original_labels_collection = []
