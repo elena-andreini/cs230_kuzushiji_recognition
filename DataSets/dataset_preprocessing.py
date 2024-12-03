@@ -84,6 +84,10 @@ def crop_boxes_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_dir):
         y1 = min(max(0, bbox[1]), img.shape[0])
         x2 = min(x1 +  bbox[2], img.shape[1])
         y2 = min(y1 + bbox[3], img.shape[0])
+        image_name = f'{label}_{image_id}_{x1}_{y1}_{x2 - x1}_{y2-y1}.png'
+        image_dst_path = os.path.join(img_dst_dir, image_name)
+        if os.path.exists(image_dst_path):
+            continue
         cropped_img = img[y1 : y2, x1 : x2]
         if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
@@ -112,6 +116,10 @@ def crop_boxes_ctx_and_save(image_id, bboxes_and_labels, img_src_dir, img_dst_di
         x2 = min(img.shape[1], bbox[0] + (radius+1) * bbox[2])
         y1 = max(0, bbox[1] - radius * bbox[3])
         y2 = min(img.shape[0], bbox[1] + (radius+1) * bbox[3])
+        image_name = f'{label}_{image_id}_{x1}_{y1}_{x2 - x1}_{y2-y1}_ctx.png'
+        image_dst_path = os.path.join(img_dst_dir, image_name)
+        if os.path.exists(image_dst_path):
+            continue
         cropped_img = img[y1 : y2, x1 : x2]
         if len(cropped_img.shape) == 2 or cropped_img.shape[2] == 1: 
             cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_GRAY2RGB)
