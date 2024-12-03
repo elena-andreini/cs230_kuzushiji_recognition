@@ -88,8 +88,8 @@ class KuzushijiDualModel(nn.Module):
         #char_features = self.fc(char_features) # code variation for single branch
         #char_features = F.relu(char_features) #code variation for single branch
         logits = self.classifier(combined_features)
-        output = F.softmax(logits, dim=1)  # Apply softmax to get probabilities
-        return output
+        #output = F.softmax(logits, dim=1)  # Apply softmax to get probabilities
+        return logits #output
 
 
 class KuzushijiDualModelContr(nn.Module):
