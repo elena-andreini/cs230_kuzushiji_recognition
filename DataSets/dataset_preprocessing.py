@@ -300,7 +300,7 @@ def generate_char_and_ctx_dataset(df, classes, full_images_path, char_images_dst
                                               char_images_dst_path)
         im2 = crop_boxes_ctx_and_save(image_id, aa,
                                               full_images_path,
-                                              char_images_dst_path)                                     
+                                              context_images_dst_path)                                     
           
         if len(im1) != len(im2):
             print(f'problems cropping image {image_id}')
