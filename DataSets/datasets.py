@@ -26,7 +26,24 @@ class SimpleImageDataset(Dataset):
             image = self.transform(image)
         return image
 
+class KuzushijiSingleDataset(Dataset):
+    def __init__(self, df, transform=None):
+        self.annotations = df
+        self.transform = transform
 
+    def __len__(self):
+        return len(self.annotations)
+
+    def __getitem__(self, idx):
+        row = self.annotations.iloc[idx]
+        label = row['label']
+        char_image_path = row['char_path']
+        char_image = cv2.imread(str(char_image_path))
+        char_padding = calculate_padding(char_image)
+        char_image = edge_aware_pad(char_image, char_padding)
+        if self.transform:
+            char_image = self.transform(char_image)
+        return char_image, label
 
 
 

@@ -323,3 +323,61 @@ def split_classification_dataset(annotations_file, train_annotation_dst_path, va
     train_df, val_df = train_test_split(shuffled_df, test_size=0.2, random_state=42)
     train_df.to_csv(train_annotation_dst_path, index=False)
     val_df.to_csv(valid_annotation_dst_path, index=False)
+
+
+
+
+def from_char_to_ctx_name(char_name, radius):
+    """
+    Converts a character image name to a context image name.
+
+    Args:
+        char_name (str): The name of the character image file.
+            Example: "char_x_y_w_h.png"
+
+    Returns:
+        str: The name of the context image file.
+            Example: "char_ctx_x_ctx_y_ctx_w_ctx_h_ctx.png"
+    """
+    # Split the character name string by underscores
+    spl = char_name.split('_')
+    
+    # Extract height, width, y-coordinate, and x-coordinate
+    h = int(spl[-1][:-4]) # Remove the '.png' part
+    w = int(spl[-2])
+    y = int(spl[-3])
+    x = int(spl[-4])
+    
+    # Calculate context image dimensions and coordinates
+    ctx_h = h * (2 * radius + 1)
+    ctx_w = w * (2 * radius + 1)
+    ctx_y = y - 2 * h
+    ctx_x = x - 2 * w
+    
+    # Replace the character coordinates and dimensions with context ones
+    spl[-4] = str(ctx_x)
+    spl[-3] = str(ctx_y)
+    spl[-2] = str(ctx_w)
+    spl[-1] = str(ctx_h)+'_ctx.png'
+    
+    # Join the parts back together into a context image name
+    ctx_name = "_".join(spl)
+    return ctx_name
+
+
+def build_dataset_from_fs(data_path, dst_annotations_file):
+    
+    data_for_df = []
+    columns = ['label', 'char_path', 'ctx_path']
+    for f in os.listdir(train_char_images):
+        char_path = os.path.join(train_char_images, f)
+        ctx_name = from_char_to_ctx_name(f)
+        ctx_path = os.path.join(train_ctx_images,ctx_name)
+        if os.path.exists(char_path) and os.path.exists(ctx_path):
+            label = f.split('_')[0]
+            data_for_df.append([label, char_path, ctx_path])
+    proc_df = pd.DataFrame(data_for_df, columns = columns)
+
+    proc_df.to_csv(dst_annotations_file, index=False)
+    
+    
