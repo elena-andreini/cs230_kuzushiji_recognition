@@ -25,6 +25,7 @@ class SimpleImageDataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
         return image
+        
 
 class KuzushijiSingleDataset(Dataset):
     def __init__(self, df, transform=None):
