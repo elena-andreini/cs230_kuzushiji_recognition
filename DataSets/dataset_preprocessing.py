@@ -365,13 +365,13 @@ def from_char_to_ctx_name(char_name, radius):
     return ctx_name
 
 
-def build_dataset_from_fs(data_path, dst_annotations_file):
+def build_dataset_from_fs(data_path, dst_annotations_file, ctx_radius):
     
     data_for_df = []
     columns = ['label', 'char_path', 'ctx_path']
     for f in os.listdir(data_path):
         char_path = os.path.join(data_path, f)
-        ctx_name = from_char_to_ctx_name(f)
+        ctx_name = from_char_to_ctx_name(f, ctx_radius)
         ctx_path = os.path.join(train_ctx_images,ctx_name)
         if os.path.exists(char_path) and os.path.exists(ctx_path):
             label = f.split('_')[0]
